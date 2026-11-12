@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Online Shopping Cart</title>
+</head>
+<link rel="stylesheet" href="style.css">
+<body>
+  <h1>Online Shop</h1>
+
+  <section id="authBox">
+  <h2>Account</h2>
+  <div id="loggedOut">
+    <input id="authUser" type="text" placeholder="Username">
+    <input id="authPass" type="password" placeholder="Password">
+    <input id="authCode" type="text" placeholder="6-digit code" maxlength="6" hidden>
+    <button onclick="register()">Register</button>
+    <button onclick="login()">Log in</button>
+  </div>
+  <div id="loggedIn" hidden>
+    <span id="welcome"></span>
+    <button onclick="logout()">Log out</button>
+    <button onclick="startMfa()">Enable MFA</button>
+  </div>
+  <div id="mfaBox" hidden>
+  <p>Scan with your authenticator app, then enter the 6-digit code.</p>
+  <img id="mfaQr" alt="MFA QR code" width="180" height="180">
+  <p>Or type this key: <code id="mfaSecret"></code></p>
+  <input id="mfaCode" type="text" placeholder="6-digit code" maxlength="6">
+  <button onclick="confirmMfa()">Confirm</button>
+</div>
+  <p id="authMsg"></p>
+</section>
+
+<section id="adminBox" hidden>
+  <h2>Admin: add product</h2>
+  <input id="newName" type="text" placeholder="Product name">
+  <input id="newPrice" type="number" placeholder="Price">
+  <button onclick="addProduct()">Add product</button>
+  <p id="adminMsg"></p>
+</section>
+
+  <h2>Products</h2>
+  <div id="productList"></div>
+  <input type="text" id="searchBox" placeholder="Search products..." oninput="displayProducts()">
+
+  <h2 id="cartHeading">Your Cart</h2>
+  <div id="cartList"></div>
+
+  <p id="summary"></p>
+<button id="checkoutBtn" onclick="checkout()">Checkout</button>
+<button onclick="clearCart()">Clear cart</button>
+<div id="receipt"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
