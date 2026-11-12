@@ -284,12 +284,25 @@ function requireRole(role) {
       logEvent("forbidden_action", { username: req.user.username, path: req.originalUrl }, req);
       return res.status(403).json({ error: "You do not have permission to do this." });
     }
+
+    if (role === "admin") {
+      const account = findUserById(req.user.id);
+      if (!account || !account.mfaEnabled) {
+        logEvent("admin_blocked_no_mfa", { username: req.user.username, path: req.originalUrl }, req);
+        return res.status(403).json({ error: "Admins must enable MFA before using admin features.", mfaSetupRequired: true });
+      }
+    }
     next();
   };
 }
 
 app.get("/api/me", requireAuth, (req, res) => {
-  res.json({ username: req.user.username, role: req.user.role });
+  const account = findUserById(req.user.id);
+  res.json({
+    username: req.user.username,
+    role: req.user.role,
+    mfaEnabled: !!(account && account.mfaEnabled)
+  });
 });
 
 app.post("/api/products", requireAuth, requireRole("admin"), (req, res) => {

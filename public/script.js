@@ -9,6 +9,15 @@ function escapeHtml(text) {
 
 let products = [];
 let isAdmin = false;
+const cart = [];
+let receiptCounter = 1;
+let authToken = sessionStorage.getItem("token") || "";
+
+function setMessage(id, text) {
+  document.getElementById(id).textContent = text;
+}
+
+/* ---------- Products ---------- */
 
 async function loadProducts() {
   try {
@@ -16,15 +25,14 @@ async function loadProducts() {
     products = await response.json();
     displayProducts();
   } catch (error) {
-    document.getElementById("productList").innerHTML =
-      "<p>Could not load products.</p>";
+    document.getElementById("productList").innerHTML = "<p>Could not load products.</p>";
   }
 }
 
 function displayProducts() {
   const list = document.getElementById("productList");
   const searchBox = document.getElementById("searchBox");
-const search = searchBox ? searchBox.value.toLowerCase().trim() : "";
+  const search = searchBox ? searchBox.value.toLowerCase().trim() : "";
   list.innerHTML = "";
 
   let found = false;
@@ -51,12 +59,8 @@ const search = searchBox ? searchBox.value.toLowerCase().trim() : "";
     list.innerHTML = "<p>No products found.</p>";
   }
 }
- 
 
-
-
-loadProducts();
-const cart = [];
+/* ---------- Cart ---------- */
 
 function addToCart(productId) {
   for (let i = 0; i < cart.length; i++) {
@@ -80,44 +84,20 @@ function addToCart(productId) {
   displayCart();
 }
 
-function displayCart() {
-  const list = document.getElementById("cartList");
-  list.innerHTML = "";
-
-  const count = getItemCount();
-  document.getElementById("cartHeading").textContent =
-    "Your Cart (" + count + (count === 1 ? " item)" : " items)");
-
-  if (cart.length === 0) {
-    list.innerHTML = "<p>Your cart is empty.</p>";
-    displaySummary();
-    return;
-  }
-
-for (let i = 0; i < cart.length; i++) {
-    const lineTotal = cart[i].price * cart[i].qty;
-    list.innerHTML +=
-      "<p>" + escapeHtml(cart[i].name) + " - GH₵" + lineTotal +
-      " <span>" +
-      "<button onclick='decreaseQty(" + i + ")'>-</button> " +
-      cart[i].qty + " " +
-      "<button onclick='increaseQty(" + i + ")'>+</button> " +
-      "<button onclick='removeFromCart(" + i + ")'>Remove</button>" +
-      "</span></p>";
-  }
-
-  displaySummary();
-}
-  
-
-
-displayCart();
 function calculateTotal() {
   let total = 0;
   for (let i = 0; i < cart.length; i++) {
     total = total + cart[i].price * cart[i].qty;
   }
   return total;
+}
+
+function getItemCount() {
+  let count = 0;
+  for (let i = 0; i < cart.length; i++) {
+    count = count + cart[i].qty;
+  }
+  return count;
 }
 
 function getDiscount(total) {
@@ -153,11 +133,58 @@ function displaySummary() {
 
   document.getElementById("summary").innerHTML = html;
 }
+
+function displayCart() {
+  const list = document.getElementById("cartList");
+  list.innerHTML = "";
+
+  const count = getItemCount();
+  document.getElementById("cartHeading").textContent =
+    "Your Cart (" + count + (count === 1 ? " item)" : " items)");
+
+  if (cart.length === 0) {
+    list.innerHTML = "<p>Your cart is empty.</p>";
+    displaySummary();
+    return;
+  }
+
+  for (let i = 0; i < cart.length; i++) {
+    const lineTotal = cart[i].price * cart[i].qty;
+    list.innerHTML +=
+      "<p>" + escapeHtml(cart[i].name) + " - GH₵" + lineTotal +
+      " <span>" +
+      "<button onclick='decreaseQty(" + i + ")'>-</button> " +
+      cart[i].qty + " " +
+      "<button onclick='increaseQty(" + i + ")'>+</button> " +
+      "<button onclick='removeFromCart(" + i + ")'>Remove</button>" +
+      "</span></p>";
+  }
+
+  displaySummary();
+}
+
+function increaseQty(index) {
+  cart[index].qty = cart[index].qty + 1;
+  displayCart();
+}
+
+function decreaseQty(index) {
+  cart[index].qty = cart[index].qty - 1;
+  if (cart[index].qty === 0) {
+    cart.splice(index, 1);
+  }
+  displayCart();
+}
+
 function removeFromCart(index) {
   cart.splice(index, 1);
   displayCart();
 }
-let receiptCounter = 1;
+
+function clearCart() {
+  cart.length = 0;
+  displayCart();
+}
 
 function checkout() {
   if (cart.length === 0) {
@@ -174,10 +201,10 @@ function checkout() {
   html += "<p>Date: " + now.toLocaleString() + "</p><hr>";
 
   for (let i = 0; i < cart.length; i++) {
-  const lineTotal = cart[i].price * cart[i].qty;
-  html += "<p>" + cart[i].name + " x" + cart[i].qty +
-          " - GH₵" + lineTotal.toFixed(2) + "</p>";
-}
+    const lineTotal = cart[i].price * cart[i].qty;
+    html += "<p>" + escapeHtml(cart[i].name) + " x" + cart[i].qty +
+            " - GH₵" + lineTotal.toFixed(2) + "</p>";
+  }
 
   html += "<hr>";
   html += "<p>Subtotal: GH₵" + total.toFixed(2) + "</p>";
@@ -192,36 +219,8 @@ function checkout() {
   cart.length = 0;
   displayCart();
 }
-function clearCart() {
-  cart.length = 0;
-  displayCart();
-}
-function getItemCount() {
-  let count = 0;
-  for (let i = 0; i < cart.length; i++) {
-    count = count + cart[i].qty;
-  }
-  return count;
-}
-function increaseQty(index) {
-  cart[index].qty = cart[index].qty + 1;
-  displayCart();
-}
 
-function decreaseQty(index) {
-  cart[index].qty = cart[index].qty - 1;
-
-  if (cart[index].qty === 0) {
-    cart.splice(index, 1);
-  }
-  displayCart();
-}
-
-let authToken = sessionStorage.getItem("token") || "";
-
-function setMessage(id, text) {
-  document.getElementById(id).textContent = text;
-}
+/* ---------- Account, login and MFA ---------- */
 
 async function register() {
   const username = document.getElementById("authUser").value;
@@ -272,11 +271,12 @@ async function login() {
 function logout() {
   authToken = "";
   sessionStorage.removeItem("token");
+  isAdmin = false;
   document.getElementById("loggedOut").hidden = false;
   document.getElementById("loggedIn").hidden = true;
   document.getElementById("adminBox").hidden = true;
-  isAdmin = false;
-displayProducts();
+  document.getElementById("mfaBox").hidden = true;
+  displayProducts();
 }
 
 async function showAccount() {
@@ -298,10 +298,56 @@ async function showAccount() {
   document.getElementById("loggedIn").hidden = false;
   document.getElementById("welcome").textContent =
     "Logged in as " + me.username + " (" + me.role + ") ";
-  document.getElementById("adminBox").hidden = me.role !== "admin";
-isAdmin = me.role === "admin";
-displayProducts();
+
+  const adminReady = me.role === "admin" && me.mfaEnabled;
+  document.getElementById("adminBox").hidden = !adminReady;
+  isAdmin = adminReady;
+  displayProducts();
+
+  if (me.role === "admin" && !me.mfaEnabled) {
+    setMessage("authMsg", "Admin accounts must enable MFA. Click Enable MFA, scan the QR code, then confirm.");
+  }
 }
+
+async function startMfa() {
+  const response = await fetch("/api/mfa/setup", {
+    method: "POST",
+    headers: { Authorization: "Bearer " + authToken }
+  });
+  const data = await response.json();
+
+  if (!response.ok) {
+    setMessage("authMsg", data.error);
+    return;
+  }
+
+  document.getElementById("mfaQr").src = data.qr;
+  document.getElementById("mfaSecret").textContent = data.secret;
+  document.getElementById("mfaBox").hidden = false;
+}
+
+async function confirmMfa() {
+  const code = document.getElementById("mfaCode").value;
+
+  const response = await fetch("/api/mfa/enable", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + authToken
+    },
+    body: JSON.stringify({ code: code })
+  });
+  const data = await response.json();
+
+  setMessage("authMsg", data.error || data.message);
+  if (response.ok) {
+    document.getElementById("mfaBox").hidden = true;
+    document.getElementById("mfaCode").value = "";
+    showAccount();
+  }
+}
+
+/* ---------- Admin ---------- */
 
 async function addProduct() {
   const name = document.getElementById("newName").value;
@@ -342,41 +388,8 @@ async function removeProduct(id) {
   }
 }
 
-async function startMfa() {
-  const response = await fetch("/api/mfa/setup", {
-    method: "POST",
-    headers: { Authorization: "Bearer " + authToken }
-  });
-  const data = await response.json();
+/* ---------- Start up ---------- */
 
-  if (!response.ok) {
-    setMessage("authMsg", data.error);
-    return;
-  }
-
-  document.getElementById("mfaQr").src = data.qr;
-  document.getElementById("mfaSecret").textContent = data.secret;
-  document.getElementById("mfaBox").hidden = false;
-}
-
-async function confirmMfa() {
-  const code = document.getElementById("mfaCode").value;
-
-  const response = await fetch("/api/mfa/enable", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: "Bearer " + authToken
-    },
-    body: JSON.stringify({ code: code })
-  });
-  const data = await response.json();
-
-  setMessage("authMsg", data.error || data.message);
-  if (response.ok) {
-    document.getElementById("mfaBox").hidden = true;
-    document.getElementById("mfaCode").value = "";
-  }
-}
-
+loadProducts();
+displayCart();
 showAccount();
