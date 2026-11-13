@@ -2,55 +2,85 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Online Shopping Cart</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Secure Shop</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
 </head>
-<link rel="stylesheet" href="style.css">
 <body>
-  <h1>Online Shop</h1>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <h1 class="brand">Secure Shop</h1>
 
-  <section id="authBox">
-  <h2>Account</h2>
-  <div id="loggedOut">
-    <input id="authUser" type="text" placeholder="Username">
-    <input id="authPass" type="password" placeholder="Password">
-    <input id="authCode" type="text" placeholder="6-digit code" maxlength="6" hidden>
-    <button onclick="register()">Register</button>
-    <button onclick="login()">Log in</button>
-  </div>
-  <div id="loggedIn" hidden>
-    <span id="welcome"></span>
-    <button onclick="logout()">Log out</button>
-    <button onclick="startMfa()">Enable MFA</button>
-  </div>
-  <div id="mfaBox" hidden>
-  <p>Scan with your authenticator app, then enter the 6-digit code.</p>
-  <img id="mfaQr" alt="MFA QR code" width="180" height="180">
-  <p>Or type this key: <code id="mfaSecret"></code></p>
-  <input id="mfaCode" type="text" placeholder="6-digit code" maxlength="6">
-  <button onclick="confirmMfa()">Confirm</button>
-</div>
-  <p id="authMsg"></p>
-</section>
+      <section id="authBox" aria-label="Account">
+        <div id="loggedOut" class="auth-form">
+          <input id="authUser" type="text" placeholder="Username" autocomplete="username">
+          <input id="authPass" type="password" placeholder="Password" autocomplete="current-password">
+          <input id="authCode" type="text" placeholder="6-digit code" maxlength="6" inputmode="numeric" hidden>
+          <button class="btn-primary" onclick="login()">Log in</button>
+          <button class="btn-ghost" onclick="register()">Register</button>
+        </div>
+        <div id="loggedIn" class="auth-status" hidden>
+          <span id="welcome"></span>
+          <button class="btn-ghost" onclick="startMfa()">Enable MFA</button>
+          <button class="btn-ghost" onclick="logout()">Log out</button>
+        </div>
+      </section>
+    </div>
+  </header>
 
-<section id="adminBox" hidden>
-  <h2>Admin: add product</h2>
-  <input id="newName" type="text" placeholder="Product name">
-  <input id="newPrice" type="number" placeholder="Price">
-  <button onclick="addProduct()">Add product</button>
-  <p id="adminMsg"></p>
-</section>
+  <main class="layout">
+    <p id="authMsg" role="status"></p>
 
-  <h2>Products</h2>
-  <div id="productList"></div>
-  <input type="text" id="searchBox" placeholder="Search products..." oninput="displayProducts()">
+    <section id="mfaBox" class="panel" hidden>
+      <h2>Set up two-step verification</h2>
+      <p class="small">Scan this code with your authenticator app, then enter the 6-digit code it shows.</p>
+      <div class="mfa-grid">
+        <img id="mfaQr" alt="MFA QR code" width="160" height="160">
+        <div class="mfa-side">
+          <p class="small">Or type this key into the app: <code id="mfaSecret"></code></p>
+          <div class="inline-form">
+            <input id="mfaCode" type="text" placeholder="6-digit code" maxlength="6" inputmode="numeric">
+            <button class="btn-primary" onclick="confirmMfa()">Confirm</button>
+          </div>
+        </div>
+      </div>
+    </section>
 
-  <h2 id="cartHeading">Your Cart</h2>
-  <div id="cartList"></div>
+    <section id="adminBox" class="panel" hidden>
+      <h2>Admin: add a product</h2>
+      <div class="inline-form">
+        <input id="newName" type="text" placeholder="Product name">
+        <input id="newPrice" type="number" placeholder="Price">
+        <button class="btn-primary" onclick="addProduct()">Add product</button>
+      </div>
+      <p id="adminMsg" class="small"></p>
+    </section>
 
-  <p id="summary"></p>
-<button id="checkoutBtn" onclick="checkout()">Checkout</button>
-<button onclick="clearCart()">Clear cart</button>
-<div id="receipt"></div>
+    <div class="columns">
+      <section class="panel">
+        <div class="panel-head">
+          <h2>Products</h2>
+          <input type="text" id="searchBox" placeholder="Search products" oninput="displayProducts()">
+        </div>
+        <div id="productList"></div>
+      </section>
+
+      <aside class="panel cart">
+        <h2 id="cartHeading">Your Cart</h2>
+        <div id="cartList"></div>
+        <p id="summary"></p>
+        <div class="cart-actions">
+          <button id="checkoutBtn" class="btn-primary" onclick="checkout()">Checkout</button>
+          <button class="btn-ghost" onclick="clearCart()">Clear cart</button>
+        </div>
+      </aside>
+    </div>
+
+    <div id="receipt"></div>
+  </main>
 
   <script src="script.js"></script>
 </body>
